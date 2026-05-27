@@ -54,7 +54,7 @@
   .dows div { height: 13px; font-size: 9px; line-height: 13px; opacity: 0.6; }
   .grid-area { display: flex; flex-direction: column; }
   .months { display: flex; gap: 3px; height: 14px; margin-bottom: 4px; font-size: 10px; }
-  .month-lbl { position: relative; }
+  .month-lbl { flex: 0 0 13px; white-space: nowrap; } /* match cell width; "Jan" overflows over the next empty slots */
   .weeks { display: flex; gap: 3px; }
   .week { display: flex; flex-direction: column; gap: 3px; }
   .cell { width: 13px; height: 13px; border: 1px solid rgba(20,17,12,0.25); background: var(--l0); }
@@ -201,10 +201,10 @@ function buildYear(year) {
       cells.push(`<div class="cell${lvl ? ' lvl' + lvl : ''}" data-d="${ds}" data-c="${count}"></div>`);
     }
     if (weekFirstMonth !== null && weekFirstMonth !== lastMonth) {
-      monthLabels.push(`<div class="month-lbl" style="min-width:16px">${MONTHS[weekFirstMonth]}</div>`);
+      monthLabels.push(`<div class="month-lbl">${MONTHS[weekFirstMonth]}</div>`);
       lastMonth = weekFirstMonth;
     } else {
-      monthLabels.push('<div class="month-lbl" style="min-width:16px"></div>');
+      monthLabels.push('<div class="month-lbl"></div>');
     }
     weeks.push(`<div class="week">${cells.join('')}</div>`);
     cur += 7 * DAY;
