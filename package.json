@@ -1,5 +1,5 @@
 {
-  "name": "git-streaks",
+  "name": "@srekaravarshan.dev/git-streaks",
   "version": "1.0.0",
   "description": "A self-hosted, GitHub-style contribution heatmap across Bitbucket + GitHub — multi-account, multi-email, local-first. Brutalist dashboard.",
   "type": "module",
