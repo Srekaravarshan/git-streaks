@@ -1,0 +1,45 @@
+{
+  "name": "git-streaks",
+  "version": "1.0.0",
+  "description": "A self-hosted, GitHub-style contribution heatmap across Bitbucket + GitHub — multi-account, multi-email, local-first. Brutalist dashboard.",
+  "type": "module",
+  "bin": {
+    "streaks": "bin/streaks.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "repos.example.json",
+    ".env.example"
+  ],
+  "scripts": {
+    "update": "node bin/streaks.js update",
+    "start": "node bin/streaks.js update --open",
+    "full": "node bin/streaks.js update --full",
+    "public": "node bin/streaks.js update --public --open"
+  },
+  "keywords": [
+    "git",
+    "bitbucket",
+    "github",
+    "contributions",
+    "heatmap",
+    "streak",
+    "cli",
+    "developer-tools"
+  ],
+  "author": "Srekaravarshan N K",
+  "license": "MIT",
+  "homepage": "https://github.com/Srekaravarshan/git-streaks#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Srekaravarshan/git-streaks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Srekaravarshan/git-streaks/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

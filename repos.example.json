@@ -1,0 +1,15 @@
+{
+  "displayName": "Your Name",
+  "authorEmails": [
+    "you@example.com",
+    "you@work.com"
+  ],
+  "since": "2023-01-01",
+  "localRoots": ["~/code", "~/Documents"],
+  "_comment": "Copy this to repos.json and edit. host is 'bitbucket' or 'github'. slug is 'workspace-or-owner/repo'. For github, 'account' names the `gh` login that can read a private repo. 'private': true hides a repo's NAME in `--public` builds (collapsed into one 'Private / work' row). 'hidden': true drops a repo from the per-repo breakdown entirely (both builds), but its commits still count toward the heatmap, totals and streaks. 'displayName' replaces your emails in `--public` builds. 'localRoots' are folders to scan for clones (default: ~/Documents).",
+  "repos": [
+    { "host": "github", "slug": "your-username/your-public-project" },
+    { "host": "github", "slug": "your-org/internal-service", "account": "your-username", "private": true },
+    { "host": "bitbucket", "slug": "your-workspace/your-repo", "private": true }
+  ]
+}

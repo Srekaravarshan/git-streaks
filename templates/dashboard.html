@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GIT STREAKS</title>
+<style>
+  :root {
+    --paper: #f4f1e9;
+    --ink: #14110c;
+    --line: #14110c;
+    --accent: #ff4f17;
+    --shadow: 6px 6px 0 var(--ink);
+    --l0: #e6e1d3;
+    --l1: #9be9a8;
+    --l2: #40c463;
+    --l3: #2f9e4f;
+    --l4: #176a30;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "JetBrains Mono", "SFMono-Regular", "Menlo", "Consolas", monospace;
+    padding: 32px 24px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header { border: 4px solid var(--line); box-shadow: var(--shadow); padding: 22px 26px; margin-bottom: 34px; background: var(--paper); }
+  h1 { font-size: clamp(28px, 6vw, 56px); letter-spacing: -1px; text-transform: uppercase; line-height: 0.95; }
+  h1 .blink { color: var(--accent); }
+  .sub { margin-top: 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.75; }
+  .sub b { background: var(--ink); color: var(--paper); padding: 1px 6px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 40px; }
+  .card { border: 3px solid var(--line); box-shadow: var(--shadow); padding: 16px 18px; background: var(--paper); }
+  .card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.7; }
+  .card .big { font-size: clamp(34px, 7vw, 52px); font-weight: 800; line-height: 1.05; margin-top: 6px; }
+  .card .big small { font-size: 16px; font-weight: 600; }
+  .card .meta { font-size: 11px; margin-top: 6px; opacity: 0.7; min-height: 14px; }
+  .card.hot { background: var(--accent); color: var(--paper); }
+  .card.hot .label, .card.hot .meta { opacity: 0.9; }
+
+  section { margin-bottom: 44px; }
+  .h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 3px solid var(--line); padding-bottom: 8px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: end; }
+  .h2 span { font-size: 11px; opacity: 0.6; letter-spacing: 1px; }
+
+  .year { margin-bottom: 26px; }
+  .year .yr { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .cal-scroll { overflow-x: auto; padding-bottom: 8px; }
+  .cal { display: inline-flex; gap: 3px; align-items: flex-start; }
+  .dows { display: flex; flex-direction: column; gap: 3px; margin-right: 6px; padding-top: 18px; }
+  .dows div { height: 13px; font-size: 9px; line-height: 13px; opacity: 0.6; }
+  .grid-area { display: flex; flex-direction: column; }
+  .months { display: flex; gap: 3px; height: 14px; margin-bottom: 4px; font-size: 10px; }
+  .month-lbl { position: relative; }
+  .weeks { display: flex; gap: 3px; }
+  .week { display: flex; flex-direction: column; gap: 3px; }
+  .cell { width: 13px; height: 13px; border: 1px solid rgba(20,17,12,0.25); background: var(--l0); }
+  .cell.pad { border-color: transparent; background: transparent; }
+  .cell.lvl1 { background: var(--l1); }
+  .cell.lvl2 { background: var(--l2); }
+  .cell.lvl3 { background: var(--l3); }
+  .cell.lvl4 { background: var(--l4); }
+  .cell:hover { outline: 2px solid var(--ink); outline-offset: -1px; }
+
+  .legend { display: flex; align-items: center; gap: 6px; font-size: 11px; margin-top: 10px; opacity: 0.8; }
+  .legend .cell { cursor: default; }
+
+  .bars { display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: grid; grid-template-columns: 240px 1fr 56px; gap: 12px; align-items: center; font-size: 12px; }
+  .bar-row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-row .name .tag { font-size: 9px; border: 1px solid var(--line); padding: 0 4px; margin-right: 6px; text-transform: uppercase; }
+  .bar-track { height: 16px; border: 2px solid var(--line); }
+  .bar-fill { height: 100%; background: var(--ink); }
+  .bar-row .count { text-align: right; font-weight: 700; }
+
+  .dow-strip { display: flex; gap: 10px; align-items: flex-end; height: 120px; }
+  .dow-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; }
+  .dow-col .bar { width: 100%; background: var(--accent); border: 2px solid var(--line); min-height: 2px; }
+  .dow-col .lbl { font-size: 11px; }
+  .dow-col .v { font-size: 10px; opacity: 0.7; }
+
+  #tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--paper); padding: 5px 9px; font-size: 11px; border: 2px solid var(--ink); opacity: 0; transform: translate(-50%, -130%); white-space: nowrap; z-index: 10; }
+  footer { font-size: 11px; opacity: 0.6; border-top: 3px solid var(--line); padding-top: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>GIT <span class="blink">/</span> STREAKS</h1>
+    <div class="sub" id="subline"></div>
+  </header>
+
+  <div class="cards" id="cards"></div>
+
+  <section>
+    <div class="h2">Contribution Heatmap <span id="heat-meta"></span></div>
+    <div id="years"></div>
+    <div class="legend">
+      <span>Less</span>
+      <div class="cell"></div>
+      <div class="cell lvl1"></div>
+      <div class="cell lvl2"></div>
+      <div class="cell lvl3"></div>
+      <div class="cell lvl4"></div>
+      <span>More</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2">By Repository <span id="repo-meta"></span></div>
+    <div class="bars" id="repos"></div>
+  </section>
+
+  <section>
+    <div class="h2">By Day of Week</div>
+    <div class="dow-strip" id="dow"></div>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+
+<div id="tip"></div>
+
+<script>
+const DATA = /*__DATA__*/ null;
+const DAY = 86400000;
+const pad = (n) => String(n).padStart(2, '0');
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+/** Count -> intensity level 0..4. */
+function level(c) {
+  if (!c) return 0;
+  if (c < 3) return 1;
+  if (c < 6) return 2;
+  if (c < 10) return 3;
+  return 4;
+}
+
+function prettyDate(ds) {
+  const [y, m, d] = ds.split('-').map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return `${DOW[dow]}, ${MONTHS[m - 1]} ${d}, ${y}`;
+}
+
+function rangeText(s) {
+  if (!s || !s.length) return '';
+  return s.start === s.end ? prettyDate(s.start) : `${prettyDate(s.start)} → ${prettyDate(s.end)}`;
+}
+
+/* ---- header + cards ---- */
+function renderHeader() {
+  const r = DATA.range;
+  const who = DATA.displayName
+    ? DATA.displayName
+    : (DATA.authorEmails && DATA.authorEmails.length ? DATA.authorEmails.join('</b> + <b>') : 'me');
+  document.getElementById('subline').innerHTML =
+    `Tracking <b>${who}</b> &nbsp;·&nbsp; ${r.first || '—'} → ${r.last || '—'}`;
+
+  const t = DATA.totals;
+  const cards = [
+    { cls: 'hot', label: 'Current Streak', big: t.currentStreak.length, unit: t.currentStreak.length === 1 ? 'day' : 'days', meta: rangeText(t.currentStreak) || 'no active streak' },
+    { label: 'Longest Streak', big: t.longestStreak.length, unit: t.longestStreak.length === 1 ? 'day' : 'days', meta: rangeText(t.longestStreak) },
+    { label: 'Total Commits', big: t.commits.toLocaleString(), meta: `${t.repos} repositories` },
+    { label: 'Active Days', big: t.activeDays.toLocaleString(), meta: `${t.maxDay.count} on the busiest day` },
+    { label: 'Busiest Day', big: t.maxDay.count, unit: 'commits', meta: t.maxDay.date ? prettyDate(t.maxDay.date) : '' },
+    { label: 'Sources', big: (DATA.byHost.bitbucket || 0).toLocaleString(), unit: 'BB', meta: `${(DATA.byHost.github || 0).toLocaleString()} from GitHub` },
+  ];
+  document.getElementById('cards').innerHTML = cards.map((c) => `
+    <div class="card ${c.cls || ''}">
+      <div class="label">${c.label}</div>
+      <div class="big">${c.big}${c.unit ? ` <small>${c.unit}</small>` : ''}</div>
+      <div class="meta">${c.meta || ''}</div>
+    </div>`).join('');
+}
+
+/* ---- heatmap ---- */
+function buildYear(year) {
+  const jan1 = Date.UTC(year, 0, 1);
+  const dec31 = Date.UTC(year, 11, 31);
+  let cur = jan1 - new Date(jan1).getUTCDay() * DAY; // back to the Sunday on/before Jan 1
+  const weeks = [];
+  const monthLabels = [];
+  let lastMonth = -1;
+
+  while (cur <= dec31) {
+    const cells = [];
+    let weekFirstMonth = null;
+    for (let r = 0; r < 7; r++) {
+      const t = cur + r * DAY;
+      const d = new Date(t);
+      const inYear = d.getUTCFullYear() === year;
+      if (!inYear) { cells.push('<div class="cell pad"></div>'); continue; }
+      if (weekFirstMonth === null) weekFirstMonth = d.getUTCMonth();
+      const ds = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+      const count = DATA.days[ds] || 0;
+      const lvl = level(count);
+      cells.push(`<div class="cell${lvl ? ' lvl' + lvl : ''}" data-d="${ds}" data-c="${count}"></div>`);
+    }
+    if (weekFirstMonth !== null && weekFirstMonth !== lastMonth) {
+      monthLabels.push(`<div class="month-lbl" style="min-width:16px">${MONTHS[weekFirstMonth]}</div>`);
+      lastMonth = weekFirstMonth;
+    } else {
+      monthLabels.push('<div class="month-lbl" style="min-width:16px"></div>');
+    }
+    weeks.push(`<div class="week">${cells.join('')}</div>`);
+    cur += 7 * DAY;
+  }
+
+  return `
+    <div class="year">
+      <div class="yr">${year}</div>
+      <div class="cal-scroll"><div class="cal">
+        <div class="dows"><div></div><div>Mon</div><div></div><div>Wed</div><div></div><div>Fri</div><div></div></div>
+        <div class="grid-area">
+          <div class="months">${monthLabels.join('')}</div>
+          <div class="weeks">${weeks.join('')}</div>
+        </div>
+      </div></div>
+    </div>`;
+}
+
+function renderYears() {
+  const keys = Object.keys(DATA.days);
+  if (!keys.length) { document.getElementById('years').innerHTML = '<p>No commits found.</p>'; return; }
+  const minY = Number(DATA.range.first.slice(0, 4));
+  const maxY = Number(DATA.range.last.slice(0, 4));
+  let html = '';
+  for (let y = maxY; y >= minY; y--) html += buildYear(y);
+  document.getElementById('years').innerHTML = html;
+  document.getElementById('heat-meta').textContent = `${DATA.totals.activeDays} active days`;
+}
+
+/* ---- bars ---- */
+function renderRepos() {
+  const max = DATA.byRepo.reduce((m, r) => Math.max(m, r.count), 0) || 1;
+  document.getElementById('repo-meta').textContent = `${DATA.byRepo.length} repos`;
+  document.getElementById('repos').innerHTML = DATA.byRepo.map((r) => `
+    <div class="bar-row">
+      <div class="name"><span class="tag">${r.host === 'bitbucket' ? 'BB' : r.host === 'github' ? 'GH' : '🔒'}</span>${r.repo}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(2, (r.count / max) * 100)}%"></div></div>
+      <div class="count">${r.count.toLocaleString()}</div>
+    </div>`).join('');
+}
+
+function renderDow() {
+  const max = Math.max(...DATA.byDow, 1);
+  document.getElementById('dow').innerHTML = DATA.byDow.map((v, i) => `
+    <div class="dow-col">
+      <div class="v">${v.toLocaleString()}</div>
+      <div class="bar" style="height:${Math.max(2, (v / max) * 90)}%"></div>
+      <div class="lbl">${DOW[i]}</div>
+    </div>`).join('');
+}
+
+/* ---- tooltip ---- */
+function wireTooltip() {
+  const tip = document.getElementById('tip');
+  document.addEventListener('mouseover', (e) => {
+    const cell = e.target.closest('.cell[data-d]');
+    if (!cell) { tip.style.opacity = 0; return; }
+    const c = Number(cell.dataset.c);
+    tip.textContent = `${c} commit${c === 1 ? '' : 's'} · ${prettyDate(cell.dataset.d)}`;
+    tip.style.opacity = 1;
+  });
+  document.addEventListener('mousemove', (e) => {
+    tip.style.left = e.clientX + 'px';
+    tip.style.top = e.clientY + 'px';
+  });
+}
+
+function renderFooter() {
+  document.getElementById('footer').textContent =
+    `Generated ${new Date(DATA.generatedAt).toLocaleString()} · git-streaks · run "streaks update" to refresh`;
+}
+
+renderHeader();
+renderYears();
+renderRepos();
+renderDow();
+renderFooter();
+wireTooltip();
+</script>
+</body>
+</html>

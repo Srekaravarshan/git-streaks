@@ -1,0 +1,10 @@
+.env
+.cache/
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# Your personal config (repo names, emails) — keep private.
+# Contributors copy repos.example.json -> repos.json instead.
+repos.json
