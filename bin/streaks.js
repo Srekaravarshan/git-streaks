@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { execFile } from 'node:child_process';
-import { loadConfig, loadEnv } from '../src/config.js';
+import { copyFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { loadConfig, loadEnv, PKG_ROOT, WORK_DIR } from '../src/config.js';
 import { loadCache, saveCache, mergeCommits } from '../src/cache.js';
 import { fetchLocalGitAll } from '../src/fetchLocalGit.js';
 import { fetchBitbucketAll } from '../src/fetchBitbucket.js';
@@ -12,7 +14,7 @@ import { render } from '../src/render.js';
 function parseArgs(argv) {
   const opts = { full: false, open: false, defaultOnly: false, noLocal: false, public: false, since: null, help: false };
   for (const a of argv) {
-    if (a === 'update') continue;
+    if (a === 'update' || a === 'init') continue;
     else if (a === '--full') opts.full = true;
     else if (a === '--open') opts.open = true;
     else if (a === '--default-only') opts.defaultOnly = true;
@@ -27,7 +29,9 @@ function parseArgs(argv) {
 
 const HELP = `git-streaks — GitHub-style contribution heatmap for Bitbucket + GitHub
 
-Usage: streaks update [options]
+Usage:
+  streaks init              Create a repos.json in the current folder to edit
+  streaks update [options]  Build the dashboard from your commits
 
 Options:
   --full            Ignore the cache and re-fetch all history
@@ -39,15 +43,34 @@ Options:
   --open            Open the dashboard in your browser when done
   -h, --help        Show this help
 
-Config:  repos.json   (repos + author emails + since)
-Auth:    .env         (BITBUCKET_EMAIL + BITBUCKET_API_TOKEN; GitHub via gh CLI)
-Output:  dist/index.html`;
+Files (in the current directory):
+  repos.json   repos + author emails + since   (run \`streaks init\` to scaffold)
+  .env         optional, for Bitbucket API fallback
+  dist/        generated dashboard(s)`;
 
 const log = (m) => process.stdout.write(m + '\n');
 
+/** Scaffold a repos.json in the current directory from the bundled example. */
+function runInit() {
+  const src = join(PKG_ROOT, 'repos.example.json');
+  const dest = join(WORK_DIR, 'repos.json');
+  if (existsSync(dest)) {
+    log(`repos.json already exists — not overwriting:\n  ${dest}`);
+  } else {
+    copyFileSync(src, dest);
+    log(`Created ${dest}`);
+    log(`\nNext: edit repos.json (your repos + author emails), then run:\n  streaks update --open`);
+  }
+  log(`\n(Optional) For Bitbucket API fallback, copy the example env:\n  cp "${join(PKG_ROOT, '.env.example')}" .env`);
+}
+
 async function main() {
-  const opts = parseArgs(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const opts = parseArgs(argv);
   if (opts.help) { log(HELP); return; }
+
+  const cmd = argv.find((a) => !a.startsWith('-')) || 'update';
+  if (cmd === 'init') { runInit(); return; }
 
   loadEnv();
   const config = loadConfig();

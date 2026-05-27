@@ -1,9 +1,12 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT } from './config.js';
+import { WORK_DIR } from './config.js';
 
-const CACHE_DIR = join(ROOT, '.cache');
+const CACHE_DIR = join(WORK_DIR, '.cache');
 const CACHE_FILE = join(CACHE_DIR, 'commits.json');
+
+/** A fresh empty cache (avoids structuredClone, which needs Node 17+). */
+const emptyCache = () => ({ version: 1, commits: {}, repos: {} });
 
 /**
  * The on-disk cache shape:
@@ -13,20 +16,18 @@ const CACHE_FILE = join(CACHE_DIR, 'commits.json');
  *   repos:   { [repoKey]: { cursors: { [branch]: tipSha } } }  // incremental walk markers
  * }
  */
-const EMPTY = { version: 1, commits: {}, repos: {} };
-
 /**
  * Load the cache from disk. Returns a fresh empty cache when `fresh` is true
  * (used by --full) or when no cache exists / is unreadable.
  * @param {boolean} [fresh=false]
  */
 export function loadCache(fresh = false) {
-  if (fresh || !existsSync(CACHE_FILE)) return structuredClone(EMPTY);
+  if (fresh || !existsSync(CACHE_FILE)) return emptyCache();
   try {
     const data = JSON.parse(readFileSync(CACHE_FILE, 'utf8'));
-    return { ...structuredClone(EMPTY), ...data, commits: data.commits || {}, repos: data.repos || {} };
+    return { version: 1, commits: data.commits || {}, repos: data.repos || {} };
   } catch {
-    return structuredClone(EMPTY);
+    return emptyCache();
   }
 }
 

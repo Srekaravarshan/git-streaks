@@ -3,8 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-/** Project root (one level above src/). */
-export const ROOT = join(__dirname, '..');
+/** The installed package root — bundled assets (the HTML template) live here. */
+export const PKG_ROOT = join(__dirname, '..');
+/**
+ * The directory the user runs `streaks` from. User files (repos.json, .env) are
+ * read from here, and outputs (dist/, .cache/) are written here — so the tool
+ * works the same whether run from a clone, a global install, or npx.
+ */
+export const WORK_DIR = process.cwd();
 
 /**
  * Minimal .env parser — avoids a dotenv dependency. Reads KEY=VALUE lines,
@@ -13,7 +19,7 @@ export const ROOT = join(__dirname, '..');
  * @returns {Record<string,string>} the parsed values
  */
 export function loadEnv() {
-  const path = join(ROOT, '.env');
+  const path = join(WORK_DIR, '.env');
   if (!existsSync(path)) return {};
   const out = {};
   for (const raw of readFileSync(path, 'utf8').split('\n')) {
@@ -37,8 +43,10 @@ export function loadEnv() {
  * @returns {{ authorEmails: string[], since: string|null, repos: Array<{host:string,slug:string,account?:string}> }}
  */
 export function loadConfig() {
-  const path = join(ROOT, 'repos.json');
-  if (!existsSync(path)) throw new Error(`Missing config: ${path}`);
+  const path = join(WORK_DIR, 'repos.json');
+  if (!existsSync(path)) {
+    throw new Error(`No repos.json found in ${WORK_DIR}\n  Run \`streaks init\` to create one, then edit it.`);
+  }
   const cfg = JSON.parse(readFileSync(path, 'utf8'));
 
   if (!Array.isArray(cfg.authorEmails) || cfg.authorEmails.length === 0) {

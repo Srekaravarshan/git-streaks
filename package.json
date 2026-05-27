@@ -1,6 +1,6 @@
 {
   "name": "@srekaravarshan.dev/git-streaks",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A self-hosted, GitHub-style contribution heatmap across Bitbucket + GitHub — multi-account, multi-email, local-first. Brutalist dashboard.",
   "type": "module",
   "bin": {
@@ -32,6 +32,9 @@
   ],
   "author": "Srekaravarshan N K",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://github.com/Srekaravarshan/git-streaks#readme",
   "repository": {
     "type": "git",

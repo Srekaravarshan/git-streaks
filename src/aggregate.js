@@ -77,6 +77,22 @@ function dayFromNum(n) {
 }
 
 /**
+ * Adaptive intensity thresholds (lower bounds for levels 1..4), from the quantiles
+ * of non-zero daily counts — so the heatmap gradient adapts to each person's volume
+ * instead of using fixed cutoffs. Strictly increasing; t1 = 1.
+ */
+function computeLevels(days) {
+  const counts = Object.values(days)
+    .filter((c) => c > 0)
+    .sort((a, b) => a - b);
+  if (counts.length === 0) return [1, 2, 3, 4];
+  const q = (p) => counts[Math.min(counts.length - 1, Math.floor(p * counts.length))];
+  const t = [1, q(0.25), q(0.5), q(0.75)];
+  for (let i = 1; i < 4; i += 1) if (t[i] <= t[i - 1]) t[i] = t[i - 1] + 1;
+  return t;
+}
+
+/**
  * Build the dashboard data model from the cached commits.
  * @param {Record<string,{repo,host,date}>} commits sha -> commit
  * @param {{authorEmails:string[]}} config
@@ -140,6 +156,7 @@ export function aggregate(commits, config) {
     byRepo: repoList,
     byHost,
     byDow,
+    levels: computeLevels(days),
   };
 }
 

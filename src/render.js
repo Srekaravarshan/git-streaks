@@ -1,9 +1,9 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT } from './config.js';
+import { PKG_ROOT, WORK_DIR } from './config.js';
 
-const TEMPLATE = join(ROOT, 'templates', 'dashboard.html');
-const OUT_DIR = join(ROOT, 'dist');
+const TEMPLATE = join(PKG_ROOT, 'templates', 'dashboard.html'); // bundled with the package
+const OUT_DIR = join(WORK_DIR, 'dist'); // written where the user runs the command
 
 /**
  * Inject the aggregated data into the dashboard template and write a fully

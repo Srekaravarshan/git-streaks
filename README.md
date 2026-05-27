@@ -12,19 +12,28 @@ totals, per-repo and per-day-of-week breakdowns.
 **Local-first:** for any repo cloned on your machine it uses `git log` — instant, complete, no
 rate limits. The host REST APIs are used only as a fallback for repos that aren't cloned locally.
 
-## Setup
+## Install
 
 Requires **Node ≥ 18**. Optional: **`gh` CLI** and/or a **Bitbucket token** — only needed for
 repos you haven't cloned locally.
 
 ```bash
-nvm use                         # uses .nvmrc (Node 20)
-cp repos.example.json repos.json
+npm i -g @srekaravarshan.dev/git-streaks    # or skip install and use npx
 ```
 
-Edit **`repos.json`** to curate which repos count, your author emails, the `since` date, and
-optionally `localRoots` (folders to scan for clones; defaults to `~/Documents`). `repos.json` is
-gitignored — your personal config never gets committed.
+## Quick start
+
+```bash
+streaks init               # writes a repos.json template into the current folder
+# edit repos.json: your repos + author emails (+ optional since, localRoots)
+streaks update --open      # build the dashboard and open it
+```
+
+Or without installing: `npx @srekaravarshan.dev/git-streaks init`, then `… update --open`.
+
+`repos.json`, the optional `.env`, and the generated `dist/` are all read/written in **the folder
+you run the command from**. Edit `repos.json` to curate which repos count, your author emails, the
+`since` date, and optionally `localRoots` (folders to scan for clones; defaults to `~/Documents`).
 
 `.env` (only for API fallback — see `.env.example` for the two valid Bitbucket token types):
 
