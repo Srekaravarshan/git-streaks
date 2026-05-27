@@ -10,6 +10,7 @@
     "bin",
     "src",
     "templates",
+    "assets",
     "repos.example.json",
     ".env.example"
   ],
@@ -34,7 +35,7 @@
   "homepage": "https://github.com/Srekaravarshan/git-streaks#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Srekaravarshan/git-streaks.git"
+    "url": "git+https://github.com/Srekaravarshan/git-streaks.git"
   },
   "bugs": {
     "url": "https://github.com/Srekaravarshan/git-streaks/issues"

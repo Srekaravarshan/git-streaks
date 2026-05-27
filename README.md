@@ -3,6 +3,8 @@
 A self-hosted, GitHub-style **contribution heatmap** across **Bitbucket + GitHub**, multiple
 accounts and multiple author emails — because Bitbucket has no streaks graph.
 
+![git-streaks — brutalist contribution heatmap](assets/dashboard.png)
+
 Reads your commits (filtered to your emails, deduped by commit SHA, across **all branches**) and
 renders a self-contained brutalist HTML dashboard: a per-year heatmap, current/longest streak,
 totals, per-repo and per-day-of-week breakdowns.
