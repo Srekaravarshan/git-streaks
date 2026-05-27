@@ -54,7 +54,10 @@
   .dows div { height: 13px; font-size: 9px; line-height: 13px; opacity: 0.6; }
   .grid-area { display: flex; flex-direction: column; }
   .months { display: flex; gap: 3px; height: 14px; margin-bottom: 4px; font-size: 10px; }
-  .month-lbl { flex: 0 0 13px; white-space: nowrap; } /* match cell width; "Jan" overflows over the next empty slots */
+  /* Match cell width exactly. min-width:0 defeats the flex auto-minimum so the
+     slot stays 13px and "Jan" overflows visibly over the next (empty) slots,
+     instead of widening its own column and drifting the labels rightward. */
+  .month-lbl { flex: 0 0 13px; min-width: 0; overflow: visible; white-space: nowrap; }
   .weeks { display: flex; gap: 3px; }
   .week { display: flex; flex-direction: column; gap: 3px; }
   .cell { width: 13px; height: 13px; border: 1px solid rgba(20,17,12,0.25); background: var(--l0); }
