@@ -107,11 +107,13 @@ async function fetchRepo({ slug, headers, authorEmails, sinceTs, cursors, defaul
 /**
  * Fetch all configured Bitbucket repos. Reads BITBUCKET_EMAIL / BITBUCKET_API_TOKEN
  * from the environment; returns [] (with a warning) when the token is missing.
- * @returns {Promise<Array<{sha,repo,host,date}>>}
+ * @returns {Promise<{ commits: Array<{sha,repo,host,date}>, skipped: string[] }>}
+ *   `skipped` lists slugs that couldn't be fetched (missing/invalid token) so the
+ *   caller can warn the user — the run still proceeds.
  */
 export async function fetchBitbucketAll(config, cache, { sinceTs, defaultOnly, log }) {
   const repos = config.repos.filter((r) => r.host === 'bitbucket');
-  if (repos.length === 0) return [];
+  if (repos.length === 0) return { commits: [], skipped: [] };
 
   // Basic-auth username: the Bitbucket username (app passwords) or the Atlassian
   // account email (scoped API tokens). BITBUCKET_USERNAME wins if both are set.
@@ -119,7 +121,7 @@ export async function fetchBitbucketAll(config, cache, { sinceTs, defaultOnly, l
   const token = process.env.BITBUCKET_API_TOKEN;
   if (!token) {
     log(`\n⚠️  BITBUCKET_API_TOKEN not set — skipping ${repos.length} Bitbucket repo(s). (GitHub still runs.)`);
-    return [];
+    return { commits: [], skipped: repos.map((r) => r.slug) };
   }
 
   const headers = {
@@ -142,7 +144,7 @@ export async function fetchBitbucketAll(config, cache, { sinceTs, defaultOnly, l
     log(`      • Bitbucket App Password: bitbucket.org → Personal settings → App passwords →`);
     log(`        Repositories: Read. Then set BITBUCKET_USERNAME = your Bitbucket username (not email).`);
     log(`    Skipping ${repos.length} Bitbucket repo(s).`);
-    return [];
+    return { commits: [], skipped: repos.map((r) => r.slug) };
   }
 
   log(`\nBitbucket — ${repos.length} repo(s):`);
@@ -157,5 +159,5 @@ export async function fetchBitbucketAll(config, cache, { sinceTs, defaultOnly, l
       log,
     }),
   );
-  return perRepo.flat();
+  return { commits: perRepo.flat(), skipped: [] };
 }

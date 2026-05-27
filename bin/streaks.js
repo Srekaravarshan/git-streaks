@@ -104,6 +104,7 @@ async function main() {
   const apiConfig = { ...config, repos: missing };
   let ghCommits = [];
   let bbCommits = [];
+  let skippedBitbucket = [];
   if (missing.some((r) => r.host === 'github')) {
     try {
       ghCommits = await fetchGithubAll(apiConfig, cache, fetchOpts);
@@ -115,7 +116,9 @@ async function main() {
   }
   if (missing.some((r) => r.host === 'bitbucket')) {
     try {
-      bbCommits = await fetchBitbucketAll(apiConfig, cache, fetchOpts);
+      const res = await fetchBitbucketAll(apiConfig, cache, fetchOpts);
+      bbCommits = res.commits;
+      skippedBitbucket = res.skipped;
     } catch (err) {
       log(`\n! Bitbucket fetch error: ${String(err.message).split('\n')[0]}`);
     }
@@ -129,6 +132,13 @@ async function main() {
   const fetchedThisRun = localCommits.length + ghCommits.length + bbCommits.length;
   const after = Object.keys(cache.commits).length;
   log(`\nFetched ${fetchedThisRun} commit(s) this run · ${after} unique total (+${after - before} new).`);
+
+  // Surface skipped Bitbucket repos clearly, but keep going (graceful degradation).
+  if (skippedBitbucket.length) {
+    log(`\n⚠️  ${skippedBitbucket.length} Bitbucket repo(s) skipped — not cloned locally and no/invalid token.`);
+    log(`    Totals may undercount these. Clone them locally, or set BITBUCKET_API_TOKEN in .env:`);
+    for (const s of skippedBitbucket) log(`      • ${s}`);
+  }
 
   let data = aggregate(cache.commits, config);
   if (opts.public) data = publicize(data, config);
