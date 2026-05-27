@@ -12,6 +12,16 @@ export const PKG_ROOT = join(__dirname, '..');
  */
 export const WORK_DIR = process.cwd();
 
+/** This package's own name, for help/error hints (read from its package.json). */
+function readPackageName() {
+  try {
+    return JSON.parse(readFileSync(join(PKG_ROOT, 'package.json'), 'utf8')).name || 'git-streaks';
+  } catch {
+    return 'git-streaks';
+  }
+}
+export const PKG_NAME = readPackageName();
+
 /**
  * Minimal .env parser — avoids a dotenv dependency. Reads KEY=VALUE lines,
  * ignores blanks and `#` comments, strips surrounding quotes. Does not override
@@ -45,7 +55,12 @@ export function loadEnv() {
 export function loadConfig() {
   const path = join(WORK_DIR, 'repos.json');
   if (!existsSync(path)) {
-    throw new Error(`No repos.json found in ${WORK_DIR}\n  Run \`streaks init\` to create one, then edit it.`);
+    throw new Error(
+      `No repos.json found in ${WORK_DIR}\n` +
+        `  Create one:  streaks init          (if installed globally)\n` +
+        `         or:   npx ${PKG_NAME} init   (if using npx)\n` +
+        `  then edit it and re-run.`,
+    );
   }
   const cfg = JSON.parse(readFileSync(path, 'utf8'));
 

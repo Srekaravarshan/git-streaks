@@ -2,7 +2,7 @@
 import { execFile } from 'node:child_process';
 import { copyFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadConfig, loadEnv, PKG_ROOT, WORK_DIR } from '../src/config.js';
+import { loadConfig, loadEnv, PKG_ROOT, WORK_DIR, PKG_NAME } from '../src/config.js';
 import { loadCache, saveCache, mergeCommits } from '../src/cache.js';
 import { fetchLocalGitAll } from '../src/fetchLocalGit.js';
 import { fetchBitbucketAll } from '../src/fetchBitbucket.js';
@@ -33,6 +33,8 @@ Usage:
   streaks init              Create a repos.json in the current folder to edit
   streaks update [options]  Build the dashboard from your commits
 
+Not installed globally? Prefix any command with:  npx ${PKG_NAME}
+
 Options:
   --full            Ignore the cache and re-fetch all history
   --since=YYYY-MM-DD Override the history start date for this run
@@ -59,7 +61,9 @@ function runInit() {
   } else {
     copyFileSync(src, dest);
     log(`Created ${dest}`);
-    log(`\nNext: edit repos.json (your repos + author emails), then run:\n  streaks update --open`);
+    log(`\nNext: edit repos.json (your repos + author emails), then run:`);
+    log(`  streaks update --open            (if installed globally)`);
+    log(`  npx ${PKG_NAME} update --open     (if using npx)`);
   }
   log(`\n(Optional) For Bitbucket API fallback, copy the example env:\n  cp "${join(PKG_ROOT, '.env.example')}" .env`);
 }
@@ -156,6 +160,8 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('\n✖ ' + (err && err.stack ? err.stack : err));
+  // Show a clean message for expected errors; full stack only with STREAKS_DEBUG.
+  const msg = err && err.message ? err.message : String(err);
+  console.error('\n✖ ' + (process.env.STREAKS_DEBUG && err && err.stack ? err.stack : msg));
   process.exit(1);
 });
